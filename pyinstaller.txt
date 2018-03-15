@@ -1,0 +1,1 @@
+pyinstaller --windowed --noconsole --uac-admin --version-file=version.py  --icon=py2talkie.ico --clean -D PyAudio2Talkie.py
