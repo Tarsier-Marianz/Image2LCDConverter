@@ -143,7 +143,7 @@ class ConvertImage(QThread):
 
     def get_output(self, code):
         if self.syntax =='0':
-            return "#include <Talkie.h>\n\nTalkie voice;\n\nconst uint8_t sp%s[] PROGMEM = {\n%s\n};\n\nvoid setup(){\n    voice.say(sp%s);\n}\nvoid loop(){\n}\n" % ( self.wav_file,code, self.wav_file)
+            return "#include <Talkie.h>\n\nTalkie voice;\n\nconst uint8_t sp%s[] PROGMEM = {\n%s\n};\n\nvoid setup(){\n    voice.say(sp%s);\n}\nvoid loop(){\n}\n" % ( self.var_name,code, self.var_name)
         elif self.syntax=='1':
             return "const uint8_t sp%s[] PROGMEM = {\n%s\n};" % (self.var_name,code)
         else:
@@ -433,9 +433,7 @@ class PyTalkieWindow(QMainWindow):
         self.config_global.set('global', 'height', str(
             self.frameGeometry().height()))
         self.config_global.set('global', 'init_dir', self.lastOpenedFolder)
-        self.config_global.set('global', 'wav_source', self.new_wavFilename)
-        self.config_global.set('global', 'wav_file', self.source_wavFilename)
-        #self.config_global.set('global', 'geometry', str(self.screenGeometry()))
+        self.config_global.set('global', 'image_file', self.image_filename)
         # Writing our configuration file
         with open(self.global_file, 'w') as configfile:
             self.config_global.write(configfile)
@@ -444,8 +442,7 @@ class PyTalkieWindow(QMainWindow):
     def reinit_configs(self):
         self.config_global.read(self.global_file)
         self.lastOpenedFolder = self.config_global.get('global', 'init_dir')
-        self.source_wavFilename = self.config_global.get('global', 'wav_source')
-        self.new_wavFilename = self.config_global.get('global', 'wav_file')
+        self.image_filename = self.config_global.get('global', 'image_file')       
         self.width = self.config_global.get('global', 'width')
         self.height = self.config_global.get('global', 'height')
         self.geometry = self.config_global.get('global', 'geometry')
@@ -453,7 +450,6 @@ class PyTalkieWindow(QMainWindow):
         self.syntax = self.config_global.get('global', 'output')
         self.wrap = self.config_global.get('global', 'wrap')
         self.is_bin = self.config_global.get('global', 'binary')
-
 
     def init_vars(self):
         self.threshold = 0
@@ -518,7 +514,7 @@ class PyTalkieWindow(QMainWindow):
         self.setWindowIcon(QIcon('images/marianz.bmp'))
         QApplication.setStyle(QStyleFactory.create(self.theme))
 
-        self.set_details(self.new_wavFilename)
+        self.set_details(self.image_filename)
         self.show()
 
         pass
@@ -559,7 +555,7 @@ class PyTalkieWindow(QMainWindow):
         if self.is_loading == True:
             return
         if tag == 'open':
-            self.openo()
+            self.open_image()
             pass
         elif tag == 'convert':
             self.start_convert()
@@ -625,7 +621,7 @@ class PyTalkieWindow(QMainWindow):
             self.is_loading = False
             self.statusBar().showMessage('Ready...')
 
-    def openo(self):
+    def open_image(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
         if fileName:
             self.image_filename = fileName
@@ -635,6 +631,7 @@ class PyTalkieWindow(QMainWindow):
                 return
 
             self.imagePreview.setPixmap(QPixmap.fromImage(image))
+            width = QPixmap.fromImage(image).width
             self.scaleFactor = 1.0
 
             #self.printAct.setEnabled(True)
@@ -643,14 +640,14 @@ class PyTalkieWindow(QMainWindow):
 
             #if not self.fitToWindowAct.isChecked():
             #    self.imagePreview.adjustSize()
-            self.imagePreview.adjustSize()
+            #self.imagePreview.adjustSize()
 
             self.set_details(self.image_filename)
            
     def set_details(self, full_filename):
         if os.path.isfile(full_filename):
             folder, filename = os.path.split(full_filename)
-            file_details = "[Source Details]\n Size: %s\n Filename: %s\n NewFilename: %s\n Directory: %s\n FullPath: %s\n WrapOutput: %s\n" % (os.path.getsize(full_filename),filename, self.wavFile, folder,full_filename,self.wrap)
+            file_details = "[Source Details]\n Size: %s\n Filename: %s\n Directory: %s\n FullPath: %s\n WrapOutput: %s\n" % (os.path.getsize(full_filename),filename,  folder,full_filename,self.wrap)
             file_details += "\nClick Convert to generate Talkie speech compatible data for Arduino...\n\nNote: the bigger file size of audio file, the longer it takes to execute conversion."
             self.textEdit.setText(file_details)
 
