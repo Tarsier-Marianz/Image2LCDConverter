@@ -61,6 +61,7 @@ class ConvertImage(QThread):
 
         return image.size[0], image.size[1], image_data
 
+
     def get_pixel_intensity(self, pixel, max_value=255):
         """
         Gets the average intensity of a pixel.
@@ -450,6 +451,8 @@ class PyTalkieWindow(QMainWindow):
         self.syntax = self.config_global.get('global', 'output')
         self.wrap = self.config_global.get('global', 'wrap')
         self.is_bin = self.config_global.get('global', 'binary')
+        self.dithering = self.config_global.get('global', 'dithering')
+        self.resize =  self.config_global.get('global', 'resize')
 
     def init_vars(self):
         self.threshold = 0
@@ -464,6 +467,8 @@ class PyTalkieWindow(QMainWindow):
         self.theme = ''
         self.syntax = ''
         self.wrap = True
+        self.dithering = False
+        self.resize = False
 
     def init_editor(self):
         font = QFont()
@@ -549,7 +554,26 @@ class PyTalkieWindow(QMainWindow):
 
     def get_defaultImage(self):
         image = QImage('images/default.png')
-        return image        
+        return image
+
+    def set_monoimage(self, source_image):
+        image_file = Image.open(source_image) # open colour image
+        if str2bool(self.dithering) == True:
+            image_file = image_file.convert('1') # convert image to black and white
+        else:
+            image_file = image_file.convert('1',dither=Image.NONE)
+        
+        self.basewidth = int(self.lcd_width)
+        if str2bool(self.resize)== True:
+            #wpercent = (self.basewidth / float(image_file.size[0]))
+            #hsize = int((float(image_file.size[1]) * float(wpercent)))
+            #image_file = image_file.resize((self.basewidth, hsize), Image.ANTIALIAS)
+            image_file= image_file.resize((int(self.lcd_width), int(self.lcd_height)), Image.ANTIALIAS)
+
+        image_file.save('images/result.bmp')   
+
+        image = QImage(os.path.join(self.dir_name,'images/result.bmp'))
+        self.imageMonoPreview.setPixmap(QPixmap.fromImage(image))
 
     def do_clickEvent(self, checked, tag):
         if self.is_loading == True:
@@ -643,6 +667,7 @@ class PyTalkieWindow(QMainWindow):
             #self.imagePreview.adjustSize()
 
             self.set_details(self.image_filename)
+            self.set_monoimage(self.image_filename)
            
     def set_details(self, full_filename):
         if os.path.isfile(full_filename):
