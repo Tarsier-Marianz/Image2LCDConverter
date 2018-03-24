@@ -453,13 +453,16 @@ class PyTalkieWindow(QMainWindow):
         self.is_bin = self.config_global.get('global', 'binary')
         self.dithering = self.config_global.get('global', 'dithering')
         self.resize =  self.config_global.get('global', 'resize')
+        self.convert_mono =  self.config_global.get('global', 'convert_mono')
+        self.lcd_width = int(self.config_global.get('global', 'lcd_width'))
+        self.lcd_height =  int(self.config_global.get('global', 'lcd_height'))
 
     def init_vars(self):
         self.threshold = 0
         self.scaleFactor = 0.0
         self.invert = False
-        self.lcd_width = 64
-        self.lcd_height = 128
+        self.lcd_width = 84
+        self.lcd_height = 48
         self.is_loading = False
         self.lastOpenedFolder = "C:\\"
         self.image_filename = ''
@@ -469,6 +472,7 @@ class PyTalkieWindow(QMainWindow):
         self.wrap = True
         self.dithering = False
         self.resize = False
+        self.convert_mono = False
 
     def init_editor(self):
         font = QFont()
@@ -570,10 +574,14 @@ class PyTalkieWindow(QMainWindow):
             #image_file = image_file.resize((self.basewidth, hsize), Image.ANTIALIAS)
             image_file= image_file.resize((int(self.lcd_width), int(self.lcd_height)), Image.ANTIALIAS)
 
-        image_file.save('images/result.bmp')   
+        image_file.save('images/result.bmp')
+        result_image = os.path.join(self.dir_name,'images/result.bmp')
 
-        image = QImage(os.path.join(self.dir_name,'images/result.bmp'))
+        image = QImage(result_image)
         self.imageMonoPreview.setPixmap(QPixmap.fromImage(image))
+
+        if str2bool(self.convert_mono) == True:
+            self.image_filename = result_image
 
     def do_clickEvent(self, checked, tag):
         if self.is_loading == True:
