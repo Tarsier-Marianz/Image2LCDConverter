@@ -187,7 +187,7 @@ class Highlighter(QSyntaxHighlighter):
                 "\\bslots\\b", "\\bstatic\\b", "\\bstruct\\b",
                 "\\btemplate\\b", "\\btypedef\\b", "\\btypename\\b",
                 "\\bunion\\b", "\\bunsigned\\b", "\\bvirtual\\b", "\\bvoid\\b",
-                "\\bvolatile\\b", "\\bPROGMEM\\b"]
+                "\\bvolatile\\b", "\\bPROGMEM\\b", "\\byte\\b"]
 
         self.highlightingRules = [(QRegExp(pattern), keywordFormat)
                 for pattern in keywordPatterns]
@@ -220,11 +220,11 @@ class Highlighter(QSyntaxHighlighter):
 
         datatypeFormat = QTextCharFormat()
         datatypeFormat.setForeground(Qt.darkGreen)
-        self.highlightingRules.append((QRegExp("uint8_t"), datatypeFormat))
+        self.highlightingRules.append((QRegExp("byte"), datatypeFormat))
 
         talkieFormat = QTextCharFormat()
         talkieFormat.setForeground(QColor(233, 115, 0))
-        self.highlightingRules.append((QRegExp("Talkie"), talkieFormat))
+        self.highlightingRules.append((QRegExp("LiquidCrystal"), talkieFormat))
 
         includeFormat = QTextCharFormat()
         includeFormat.setForeground(QColor(94, 109, 3))
@@ -694,7 +694,7 @@ class PyTalkieWindow(QMainWindow):
         if os.path.isfile(full_filename):
             folder, filename = os.path.split(full_filename)
             file_details = "[Source Details]\n Size: %s\n Filename: %s\n Directory: %s\n FullPath: %s\n WrapOutput: %s\n" % (os.path.getsize(full_filename),filename,  folder,full_filename,self.wrap)
-            file_details += "\nClick Convert to generate Talkie speech compatible data for Arduino...\n\nNote: the bigger file size of audio file, the longer it takes to execute conversion."
+            file_details += "\nClick Convert to generate byte array of opened image file compatible for Arduino-NOKIA 3310/5110 LCD...\n\nNote: the bigger file size of audio file, the longer it takes to execute conversion."
             self.textEdit.setText(file_details)
 
     def save(self):
