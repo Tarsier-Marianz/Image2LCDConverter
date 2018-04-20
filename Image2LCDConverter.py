@@ -23,7 +23,7 @@ def str2bool(v):
 class ConvertImage(QThread):
     sec_signal = pyqtSignal(str)
 
-    def __init__(self, parent=None, image_file='', lcd_width = 64, lcd_height= 128, threshold= 0, invert= False, syntax='0', wrap= True):
+    def __init__(self, parent=None, image_file='', var_name ='customChar', lcd_width = 64, lcd_height= 128, threshold= 0, invert= False, syntax='0', wrap= True):
         super(ConvertImage, self).__init__(parent)
         self.current_time = 0
         self.wrap = wrap
@@ -33,7 +33,7 @@ class ConvertImage(QThread):
         self.image_file = image_file
         self.lcd_width = lcd_width
         self.lcd_height = lcd_height
-        self.var_name = self.get_declaration()
+        self.var_name = var_name #self.get_declaration(image_file)
         self.newline_bit = 16
         self.is_version3 = False
 
@@ -41,8 +41,9 @@ class ConvertImage(QThread):
             # Python 3 code in this block
             self.is_version3 = True
     
-    def get_declaration(self):
-        trim_name = re.sub(' +', ' ', self.image_file)
+    def get_declaration(self,img_file):
+        trim_name = str(img_file).split('\\')[-1:][0]
+        trim_name = re.sub(' +', ' ', img_file)
         trim_name = trim_name.replace(' ', '_')
         return trim_name.replace('-', '').upper()
 
@@ -106,7 +107,7 @@ class ConvertImage(QThread):
         """
         Outputs the data in a C bitmap array format.
         """
-
+        code = ''
         print ('{')
 
         for y_idx in range(0, height):
@@ -122,8 +123,10 @@ class ConvertImage(QThread):
                     next_value += 2 ** (7 - (x_idx % 8))
 
             print (next_line)
+            code = code +next_line            
 
         print ('};')
+        self.sec_signal.emit(self.get_output(code))  # display code to text area
 
 
     def convert(self, image_file):
@@ -144,9 +147,9 @@ class ConvertImage(QThread):
 
     def get_output(self, code):
         if self.syntax =='0':
-            return "#include <Talkie.h>\n\nTalkie voice;\n\nconst uint8_t sp%s[] PROGMEM = {\n%s\n};\n\nvoid setup(){\n    voice.say(sp%s);\n}\nvoid loop(){\n}\n" % ( self.var_name,code, self.var_name)
+            return "#include <LiquidCrystal.h>\n\nLiquidCrystal lcd(12, 11, 5, 4, 3, 2);\n\nbyte char%s[] = {\n%s\n};\n\nvoid setup(){\n    lcd.begin(86, 48);\n    lcd.write(byte(0));\n}\nvoid loop(){\n}\n" % ( self.var_name,code)
         elif self.syntax=='1':
-            return "const uint8_t sp%s[] PROGMEM = {\n%s\n};" % (self.var_name,code)
+            return "byte char%s[] = {\n%s\n};" % (self.var_name,code)
         else:
             return code
     
@@ -466,6 +469,7 @@ class PyTalkieWindow(QMainWindow):
         self.is_loading = False
         self.lastOpenedFolder = "C:\\"
         self.image_filename = ''
+        self.var_name =''
         self.geometry = ''
         self.theme = ''
         self.syntax = ''
@@ -638,7 +642,7 @@ class PyTalkieWindow(QMainWindow):
             # change the cursor
             QApplication.setOverrideCursor(Qt.WaitCursor)
             self.is_loading = True
-            self._converter = ConvertImage(image_file= self.image_filename , syntax=self.syntax, wrap= str2bool(self.wrap))
+            self._converter = ConvertImage(image_file= self.image_filename ,var_name=self.var_name, syntax=self.syntax, wrap= str2bool(self.wrap))
             self._converter.sec_signal.connect(self.textEdit.setText)
             self._converter.start()
             self._converter.wait()
@@ -653,6 +657,13 @@ class PyTalkieWindow(QMainWindow):
             self.is_loading = False
             self.statusBar().showMessage('Ready...')
 
+    def get_varName(self, filename):
+        #trim_name = re.sub(' +', ' ', filename)
+        filename_w_ext = os.path.basename(filename)
+        filename, file_extension = os.path.splitext(filename_w_ext)
+        trim_name = filename.replace(' ', '_')
+        return trim_name.replace('-', '').upper()
+    
     def open_image(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
         if fileName:
@@ -661,6 +672,8 @@ class PyTalkieWindow(QMainWindow):
             if image.isNull():
                 QMessageBox.information(self, "Image Viewer","Cannot load %s." % self.image_filename)
                 return
+            
+            self.var_name = self.get_varName(self.image_filename)
 
             self.imagePreview.setPixmap(QPixmap.fromImage(image))
             width = QPixmap.fromImage(image).width
