@@ -101,3 +101,9 @@ ENV/
 # global config folder
 /config/global.ini
 config/global.ini
+global.ini
+
+#result image
+/images/result.bmp
+images/result.bmp
+result.bmp
