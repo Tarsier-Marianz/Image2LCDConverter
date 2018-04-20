@@ -116,7 +116,7 @@ class ConvertImage(QThread):
 
             for x_idx in range(0, width):
                 if (x_idx % 8 == 0 or x_idx == width - 1) and x_idx > 0:
-                    next_line += str('0x%0.2X' % next_value).lower() + ","
+                    next_line += str('0x%0.2X' % next_value).lower() + ", "
                     next_value = 0
 
                 if self.get_pixel_intensity(pixel_data[x_idx, y_idx]) > crossover:
@@ -126,6 +126,7 @@ class ConvertImage(QThread):
             code = code +next_line            
 
         print ('};')
+        
         self.sec_signal.emit(self.get_output(code))  # display code to text area
 
 
