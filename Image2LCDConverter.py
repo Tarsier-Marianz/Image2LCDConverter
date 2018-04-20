@@ -742,13 +742,12 @@ class PyTalkieWindow(QMainWindow):
             pass
 
     def about(self):
-        QMessageBox.about(self, "About PyAudio-Talkie Synthesis",
-                          "<b>PyAudio-Talkie Synthesis</b><br>"
+        QMessageBox.about(self, "About Image2LCDConverter",
+                          "<b>Image2LCDConverter</b><br>"
                           "Version: <b>1.1.8101.99616</b><br><br>"
                           "Copyright  © <b> Tarsier 2018</b><br><br>"
-                          "GUI based ( of <b>ArduinoTalkieSpeech-Py</b>) that convert audio <br>"
-                          "file (WAV) to <b>Talkie</b> (speech synthesis for arduino) <br>"
-                          "compatible data.")
+                          "A simple image to LCD converter compatible<br>"
+                          "to <b> Nokia 3310/5110 LCD </b> ")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
