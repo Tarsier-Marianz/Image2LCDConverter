@@ -8,10 +8,10 @@ Convert image file to [**NOKIA 3310/5110 LCD**](https://github.com/going-digital
 
 
 ## Screenshot
-![Py2Talkie](images/screenshot.png?raw=true "PyAudio-Talkie Synthesis GUI")
+![Image2LCDConverter](images/screenshot.png?raw=true "Image2LCDConverter GUI")
 
 
-![Py2TalkieDark](images/screenshot-dark.png?raw=true "PyAudio-Talkie Synthesis GUI Dark Fusion Theme")
+![Image2LCDConverterOption](images/screenshot-dark.png?raw=true "Image2LCDConverter Options")
 
 
 # Credits
